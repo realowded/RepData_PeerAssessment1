@@ -60,6 +60,8 @@ mean_by_int <- tapply(act$steps,act$interval,mean,na.rm=TRUE)
 plot(row.names(mean_by_int),mean_by_int,type="l",xlab="Time intervals (in minutes)",ylab="Average of Total Steps",main="Time Series Plot of the Average of Total Steps in a Day")
 ```
 
+![Sample panel plot](instructions_fig/shak.png) 
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? The answer is time interval 835. First, I obtain the max value of the mean_by_int vector, which contains the mean of every interval. Next I use the match() function to find the index of the max value of the mean_by_int vector. Finally, I access the location of the vector.
 ```{r, echo=TRUE}
 x <- max(mean_by_int)
@@ -98,6 +100,7 @@ hist(new_sum_by_date,col=terrain.colors(8),xlab="Total Steps by Date",main="Adju
 
 ```
 
+![Sample panel plot](instructions_fig/second_hist.png) 
 
 ```{r, echo=TRUE}
 mean(new_sum_by_date)
@@ -140,4 +143,5 @@ xyplot(new_mean_by_int$steps ~ new_mean_by_int$interval | new_mean_by_int$day, l
 
 ```
 
+![Sample panel plot](instructions_fig/lastshak.png)
 
