@@ -1,10 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-Author:Adejumo Akeem
-Date: April 17, 2016.
-  html_document:
-    keep_md: true
----
+
+## Title: "Reproducible Research: Peer Assessment 1"
+# Author:Adejumo Akeem
+# Date: April 17, 2016.
+
+
 
 I start by loading all the packages that might come in handy.
 
