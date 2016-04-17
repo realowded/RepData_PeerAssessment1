@@ -7,19 +7,125 @@ output:
 
 
 ## Loading and preprocessing the data
+I loaded the Activity data into my work space and saved it as act. I used the str function to determine the class and type of the varibale
+```{r,echo=TRUE}
+act <- read.csv("activity.csv")
+str(act)
+```
+I would want to rename the column names to match the type of the varibles.
+
+```{r,echo=TRUE}
+act <- read.csv("activity.csv",colClasses=c("numeric","Date","numeric"))
+str(act)
+
+```
 
 
 
 ## What is mean total number of steps taken per day?
 
+```{r, echo=TRUE}
+sum_by_date <- tapply(act$steps,act$date,sum,na.rm=TRUE)
+hist(sum_by_date,col=heat.colors(8),xlab="Total Steps by Date",main="Histogram of Total Steps by Date")
+
+```
+The mean and the median for the total number of steps per day is located below:
+```{r, echo=TRUE}
+mean(sum_by_date)
+```
+```{r, echo=TRUE}
+median(sum_by_date)
+```
 
 
 ## What is the average daily activity pattern?
+
+Now I will create the time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
+
+First, I use tapply() calculate the mean of the steps per interval. Next, the data is implemented in the time series plot below.
+```{r, echo=TRUE}
+mean_by_int <- tapply(act$steps,act$interval,mean,na.rm=TRUE)
+plot(row.names(mean_by_int),mean_by_int,type="l",xlab="Time intervals (in minutes)",ylab="Average of Total Steps",main="Time Series Plot of the Average of Total Steps in a Day")
+```
+
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? The answer is time interval 835. First, I obtain the max value of the mean_by_int vector, which contains the mean of every interval. Next I use the match() function to find the index of the max value of the mean_by_int vector. Finally, I access the location of the vector.
+```{r, echo=TRUE}
+x <- max(mean_by_int)
+match(x,mean_by_int)
+
+```
+
+```{r,echo= TRUE}
+mean_by_int[104]
+
+```
 
 
 
 ## Imputing missing values
 
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs). I use the sum() and is.na() functions to accomplish this task
+```{r, echo=TRUE}
+sum(is.na(act))
+```
 
+To accomplish this task, I first create two separate data frames, one without NAs and one with all rows with NA values for the steps vector. Next, I insert the mean_by_int vector into the data frame that contains all NAs for the steps variable. Once this is done, I bind the data frame with no NAs with the data frame that now contains all of the mean values for the corresponding time intervals. Finally a new dataset is created that is equal to the original dataset but with the missing data filled in.
+
+```{r, echo= TRUE}
+act_na <- act[is.na(act),]
+act_no_na <- act[complete.cases(act),]
+act_na$steps <- as.numeric(mean_by_int)
+new_act <- rbind(act_na,act_no_na)
+new_act <- new_act[order(new_act[,2],new_act[,3]),]
+```
+
+For the histogram, I used tapply() function to calculate the daily sums of total steps from the new dataset. I also calculated the mean and median for the new dataset.
+```{r, echo= TRUE}
+new_sum_by_date <- tapply(new_act$steps,new_act$date,sum)
+hist(new_sum_by_date,col=terrain.colors(8),xlab="Total Steps by Date",main="Adjusted Histogram of Total Steps by Date (no missing values)")
+
+```
+
+
+```{r, echo=TRUE}
+mean(new_sum_by_date)
+```
+
+```{r, echo=TRUE}
+median(new_sum_by_date)
+```
+
+In comparing the histogram with the data frame that contained missing values against the data frame that had the missing values filled in, I noticed a change on the left side of the graph. In the first histogram, the data is skewed to the left although the data represents a normal distribution curve. In the second histogram, the data very closely resembles a normal distribution curve. Imputing the missing data on the data frame possibly allows a more accurate distribution of the data. This would allow researchers to get a true repesentation of the amount of steps that are taken during specific intervals during the day.
+
+For the mean and median of the new data set, there was an unusual phenomenon. The mean and meadian for the total steps per day were both 10766.19. This figure seems to confirm from the histogram that imputing the missing data with the mean averages from the time intervals helps to create a normal distribution of the total steps.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+For this part, I used the weekdays() function to generate a vector of the weekdays according to the date. Next, I combined the activity data frame with the newly created days vector. I utilized the plyr library so I could implement the revalue() function. Finally, I used the aforementioned function to convert the days to weekend or weekday as instructed.
+
+```{r, echo=TRUE}
+days <- weekdays(new_act[,2])
+new_act <- cbind(new_act,days)
+library(plyr)
+new_act$days <- revalue(new_act$days,c("Monday"="weekday","Tuesday"="weekday","Wednesday"="weekday","Thursday"="weekday","Friday"="weekday"))
+new_act$days <- revalue(new_act$days,c("Saturday"="weekend","Sunday"="weekend"))
+
+```
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+For this part, I first used the tapply() function to create a dataset that contained the mean of the intervals and group them according to the day (weekday or weekend). Next, I used the reshape2 library to implement the melt command on the newly created dataset of mean of the intervals for the total steps. Finally, I created a lattice plot to show the time series plot of the mean total steps by the intervals for the weekday and the weekend.
+
+The time plot shows that there is more activity after the 1000 time interval on the weekend instead of the weekday. However, the plot also shows that the most steps are taken during a time interval during the weekday (possibly the 835 time interval).
+```{r, echo=TRUE}
+new_mean_by_int <- tapply(new_act$steps,list(new_act$interval,new_act$days),mean)
+library(reshape2)
+new_mean_by_int <- melt(new_mean_by_int)
+colnames(new_mean_by_int) <- c("interval","day","steps")
+library(lattice)
+xyplot(new_mean_by_int$steps ~ new_mean_by_int$interval | new_mean_by_int$day, layout=c(1,2),type="l",main="Time Series Plot of the Average of Total Steps (weekday vs. weekend)",xlab="Time intervals (in minutes)",ylab="Average of Total Steps")
+
+```
+
+
