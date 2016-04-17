@@ -37,6 +37,9 @@ sum_by_date <- tapply(act$steps,act$date,sum,na.rm=TRUE)
 hist(sum_by_date,col=heat.colors(8),xlab="Total Steps by Date",main="Histogram of Total Steps by Date")
 
 ```
+
+![Sample panel plot](instructions_fig/hist.png) 
+
 The mean and the median for the total number of steps per day is located below:
 ```{r, echo=TRUE}
 mean(sum_by_date)
