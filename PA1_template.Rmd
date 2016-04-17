@@ -1,14 +1,23 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
+Author:Adejumo Akeem
+Date: April 17, 2016.
   html_document:
     keep_md: true
 ---
 
+I start by loading all the packages that might come in handy.
+
+```{r}
+library(dplyr)
+library(devtools)
+library(statsr)
+```
 
 ## Loading and preprocessing the data
-I loaded the Activity data into my work space and saved it as act. I used the str function to determine the class and type of the varibale
-```{r,echo=TRUE}
+I loaded the Activity data into my work space and saved it as act. I used the str function to determine the class and type of the varibale.
+
+```{r , echo=TRUE}
 act <- read.csv("activity.csv")
 str(act)
 ```
@@ -33,6 +42,7 @@ The mean and the median for the total number of steps per day is located below:
 ```{r, echo=TRUE}
 mean(sum_by_date)
 ```
+
 ```{r, echo=TRUE}
 median(sum_by_date)
 ```
